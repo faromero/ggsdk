@@ -34,6 +34,10 @@ rm -rf .gg *.out
 
 # Walk through test_lines.txt and each output file to check for correctness
 file_ind=0
+num_passed=0
+num_failed=0
+
+echo
 while IFS='' read -r line || [[ -n "$line" ]]; do
     next_file="test_"${file_ind}".out"
     echo "Now testing output of "${next_file}
@@ -43,13 +47,27 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     fi
     check_line=$(head -n 1 ${next_file})
     gold_line="Thunk "${file_ind}" read: "${line}
-    echo "Gold line: "${gold_line}
-    echo "Text read from line: "${check_line}
-    echo "PASS"
-    echo "---"
+    if [ "${gold_line}" == "${check_line}" ]; then
+        num_passed=$[$num_passed + 1]
+        echo "PASS"
+        echo "---"
+    else
+        num_failed=$[$num_failed + 1]
+        echo "TEST FAILED"
+        echo "Expected: "${gold_line} 
+        echo "Read: "${check_line}
+        echo "---"
+    fi 
+    file_ind=$[$file_ind + 1]
 done < test_lines.txt
 
-echo "All tests passed!"
+# Output results
+echo
+echo "All tests completed"
+echo "==="
+echo ${num_passed}" tests passed"
+echo ${num_failed}" tests failed"
+echo "==="
 
 # Clean up environment for next run
 rm -rf .gg *.out gg_pb2.py* gg_sdk.py*
