@@ -1,7 +1,5 @@
 #! /usr/bin/python
 
-import sys
-import os
 from gg_sdk import GG, GGThunk
 
 test_prog_bin = 'test_program'
