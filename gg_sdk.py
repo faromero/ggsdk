@@ -110,7 +110,11 @@ class GGThunk(object):
                     # predict it to be a regular FILE
                     pred_type = magic.from_file(new_inf)
                     if "ELF" in pred_type:
-                        _if_type = 'EXECUTABLE'
+                        if "statically linked" in pred_type:
+                            _if_type = 'EXECUTABLE'
+                        else:
+                            print("Only statically linked binaries supported")
+                            sys.exit(1)
                     else:
                         _if_type = 'FILE'
                 else:

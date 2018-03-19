@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#! /usr/bin/python3
 
 from gg_sdk import GG, GGThunk
 import sys
@@ -171,8 +171,7 @@ def generate_batch(start, end, quality):
 
 if __name__ == '__main__':
     if len(sys.argv) != 6:
-        print("Usage: gen_makefile.py <start> <end> <batch-size> <cq-level> <nworkers>", 
-                file=sys.stderr)
+        print("Usage: gen_makefile.py <start> <end> <batch-size> <cq-level> <nworkers>")
         sys.exit(1)
 
     start = int(sys.argv[1])
