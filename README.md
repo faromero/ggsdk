@@ -13,11 +13,8 @@ Note: In this README, ```gg``` refers to the execution platform while GG refers 
 ```GG(cleanenv=True)```: Class Constructor
 - **cleanenv**: Setting this to True (default) will remove the reductions and remote directories from .gg, which is the local directory used by gg to keep track of thunks and their reductions. This will allow ```gg``` to perform a “fresh” experiment run each time it runs. Setting this to False will maintain previous runs, which means that gg will likely not have to do any new thunk executions when rerun.
 
-```set_env(env)```: Function to change the environment after class object creation.
-
-```set_numjobs(numjobs)```: Function to change the number of workers executing thunks after class object creation.
-
-```clean_env(deepClean=False)```: Function to clean gg environment. By default, this gets called by the GG constructor with deepClean=False (i.e. only remove the reductions and remote directories). User can call this method with deepClean=True to remove all directories from .gg and start the ```gg``` environment from scratch.
+```clean_env(deepClean=False)```: Function to clean gg environment.
+- **deepClean**: Only remove the reductions and remote directories. User can call this method with deepClean=True to remove all directories from .gg and start the ```gg``` environment from scratch.
 
 ```create_thunks(inputs)```: Creates all thunks recursively, starting from *inputs*. Does not execute them, thus allowing for the user to manage thunks separately
 - **inputs**: one or more thunks to be starting point for thunk creations. For multiple thunks, pass in as a list. Function call will block until execution is completed.
@@ -40,11 +37,11 @@ Users almost always will only need to call ```create_thunks``` or ```create_and_
 - **exe_args**: Executable arguments (such as flags, input files, output files, etc.). Passed in as a list of arguments. Defaults to an empty list. If there are no executable arguments that need to be set, this can be left empty.
 - **args_infiles**: By default, ```gg``` will attempt to take all exe_args and turn them into infiles. This is especially useful if the executable’s arguments are all input files/data with no flags. However, for programs that mix flags with input files, ```ggSDK``` will not be able to differentiate between the two. Thus, if your exe_args are a mix of flags with input files, or if you prefer to explicitly pass in all infiles, set this parameter to be False.
 
-```add_infile(all_inf, if_type=’INVALID’)```: Function to add an infile once the thunk is created.
+```add_infile(all_inf, if_type='INVALID')```: Function to add an infile once the thunk is created.
 - **all_inf**: one or more infiles to be added as dependencies. For multiple infiles, pass in as a list. Infiles can be a) the name of a file, b) the name of an executable, and/or c) a GGThunk object (thus creating a graph/pipeline). Infile types can be mixed within the all_inf list.
 - **if_type**: infile type. This parameter is optional, and can be left as INVALID (the default) since ```ggSDK``` will automatically infer the type (which is especially useful when mixing different infile types).
 
-```print_thunk(numjobs)```: Function to print out the thunk in json format.
+```print_thunk()```: Function to print out the thunk in json format.
 
 Users almost always will only need to call ```add_infile```.
 
