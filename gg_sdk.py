@@ -404,7 +404,7 @@ GG class. Interfaces with the GG platform, creates GGThunk placeholders,
 and creates graph.
 """
 class GG(object):
-    def __init__(self, cleanenv=True, isgen=True):
+    def __init__(self, cleanenv=True):
         if cleanenv:
             self.clean_env()
 
