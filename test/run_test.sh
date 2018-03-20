@@ -70,5 +70,5 @@ echo ${num_failed}" tests failed"
 echo "==="
 
 # Clean up environment for next run
-rm -rf .gg *.out gg_pb2.py* gg_sdk.py*
+rm -rf .gg *.out gg_pb2.py* gg_sdk.py* test_program
 
