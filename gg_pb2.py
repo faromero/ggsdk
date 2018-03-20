@@ -19,9 +19,8 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='gg.proto',
   package='gg.protobuf',
   syntax='proto3',
-  serialized_pb=_b('\n\x08gg.proto\x12\x0bgg.protobuf\"C\n\x08\x46unction\x12\x0b\n\x03\x65xe\x18\x01 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x02 \x03(\t\x12\x0c\n\x04hash\x18\x03 \x01(\t\x12\x0e\n\x06\x65nvars\x18\x04 \x03(\t\"\xa4\x01\n\x06InFile\x12\x10\n\x08\x66ilename\x18\x01 \x01(\t\x12\x0c\n\x04hash\x18\x02 \x01(\t\x12\r\n\x05order\x18\x03 \x01(\r\x12\x0c\n\x04size\x18\x04 \x01(\x04\x12&\n\x04type\x18\x05 \x01(\x0e\x32\x18.gg.protobuf.InFile.Type\"5\n\x04Type\x12\x08\n\x04\x46ILE\x10\x00\x12\x0e\n\nEXECUTABLE\x10\x01\x12\x13\n\x0f\x44UMMY_DIRECTORY\x10\x02\"g\n\x05Thunk\x12\'\n\x08\x66unction\x18\x01 \x01(\x0b\x32\x15.gg.protobuf.Function\x12$\n\x07infiles\x18\x02 \x03(\x0b\x32\x13.gg.protobuf.InFile\x12\x0f\n\x07outfile\x18\x03 \x01(\t\">\n\x0cLambdaInFile\x12\x0c\n\x04hash\x18\x01 \x01(\t\x12\x0c\n\x04size\x18\x03 \x01(\x04\x12\x12\n\nexecutable\x18\x02 \x01(\x08\"t\n\x0bLambdaEvent\x12\x12\n\nthunk_hash\x18\x01 \x01(\t\x12\x11\n\ts3_bucket\x18\x02 \x01(\t\x12*\n\x07infiles\x18\x03 \x03(\x0b\x32\x19.gg.protobuf.LambdaInFile\x12\x12\n\nthunk_data\x18\x04 \x01(\t\"i\n\x0eRemoteResponse\x12\x12\n\nthunk_hash\x18\x01 \x01(\t\x12\x13\n\x0boutput_hash\x18\x02 \x01(\t\x12\x13\n\x0boutput_size\x18\x03 \x01(\x04\x12\x19\n\x11\x65xecutable_output\x18\x04 \x01(\x08\x62\x06proto3')
+  serialized_pb=_b('\n\x08gg.proto\x12\x0bgg.protobuf\"C\n\x08\x46unction\x12\x0b\n\x03\x65xe\x18\x01 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x02 \x03(\t\x12\x0c\n\x04hash\x18\x03 \x01(\t\x12\x0e\n\x06\x65nvars\x18\x04 \x03(\t\"\xa4\x01\n\x06InFile\x12\x10\n\x08\x66ilename\x18\x01 \x01(\t\x12\x0c\n\x04hash\x18\x02 \x01(\t\x12\r\n\x05order\x18\x03 \x01(\r\x12\x0c\n\x04size\x18\x04 \x01(\x04\x12&\n\x04type\x18\x05 \x01(\x0e\x32\x18.gg.protobuf.InFile.Type\"5\n\x04Type\x12\x08\n\x04\x46ILE\x10\x00\x12\x0e\n\nEXECUTABLE\x10\x01\x12\x13\n\x0f\x44UMMY_DIRECTORY\x10\x02\"g\n\x05Thunk\x12\'\n\x08\x66unction\x18\x01 \x01(\x0b\x32\x15.gg.protobuf.Function\x12$\n\x07infiles\x18\x02 \x03(\x0b\x32\x13.gg.protobuf.InFile\x12\x0f\n\x07outfile\x18\x03 \x01(\t\">\n\x0cLambdaInFile\x12\x0c\n\x04hash\x18\x01 \x01(\t\x12\x0c\n\x04size\x18\x03 \x01(\x04\x12\x12\n\nexecutable\x18\x02 \x01(\x08\"5\n\x0bRequestItem\x12\x12\n\nthunk_hash\x18\x01 \x01(\t\x12\x12\n\nthunk_data\x18\x02 \x01(\t\"U\n\x10\x45xecutionRequest\x12(\n\x06thunks\x18\x01 \x03(\x0b\x32\x18.gg.protobuf.RequestItem\x12\x17\n\x0fstorage_backend\x18\x02 \x01(\t\"g\n\x0cResponseItem\x12\x12\n\nthunk_hash\x18\x01 \x01(\t\x12\x13\n\x0boutput_hash\x18\x02 \x01(\t\x12\x13\n\x0boutput_size\x18\x03 \x01(\x04\x12\x19\n\x11\x65xecutable_output\x18\x04 \x01(\x08\"l\n\x11\x45xecutionResponse\x12\x32\n\x0f\x65xecuted_thunks\x18\x01 \x03(\x0b\x32\x19.gg.protobuf.ResponseItem\x12\x13\n\x0breturn_code\x18\x02 \x01(\r\x12\x0e\n\x06output\x18\x03 \x01(\tb\x06proto3')
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -254,37 +253,23 @@ _LAMBDAINFILE = _descriptor.Descriptor(
 )
 
 
-_LAMBDAEVENT = _descriptor.Descriptor(
-  name='LambdaEvent',
-  full_name='gg.protobuf.LambdaEvent',
+_REQUESTITEM = _descriptor.Descriptor(
+  name='RequestItem',
+  full_name='gg.protobuf.RequestItem',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='thunk_hash', full_name='gg.protobuf.LambdaEvent.thunk_hash', index=0,
+      name='thunk_hash', full_name='gg.protobuf.RequestItem.thunk_hash', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='s3_bucket', full_name='gg.protobuf.LambdaEvent.s3_bucket', index=1,
+      name='thunk_data', full_name='gg.protobuf.RequestItem.thunk_data', index=1,
       number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='infiles', full_name='gg.protobuf.LambdaEvent.infiles', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='thunk_data', full_name='gg.protobuf.LambdaEvent.thunk_data', index=3,
-      number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -302,40 +287,78 @@ _LAMBDAEVENT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=430,
-  serialized_end=546,
+  serialized_end=483,
 )
 
 
-_REMOTERESPONSE = _descriptor.Descriptor(
-  name='RemoteResponse',
-  full_name='gg.protobuf.RemoteResponse',
+_EXECUTIONREQUEST = _descriptor.Descriptor(
+  name='ExecutionRequest',
+  full_name='gg.protobuf.ExecutionRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='thunk_hash', full_name='gg.protobuf.RemoteResponse.thunk_hash', index=0,
+      name='thunks', full_name='gg.protobuf.ExecutionRequest.thunks', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='storage_backend', full_name='gg.protobuf.ExecutionRequest.storage_backend', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=485,
+  serialized_end=570,
+)
+
+
+_RESPONSEITEM = _descriptor.Descriptor(
+  name='ResponseItem',
+  full_name='gg.protobuf.ResponseItem',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='thunk_hash', full_name='gg.protobuf.ResponseItem.thunk_hash', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='output_hash', full_name='gg.protobuf.RemoteResponse.output_hash', index=1,
+      name='output_hash', full_name='gg.protobuf.ResponseItem.output_hash', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='output_size', full_name='gg.protobuf.RemoteResponse.output_size', index=2,
+      name='output_size', full_name='gg.protobuf.ResponseItem.output_size', index=2,
       number=3, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='executable_output', full_name='gg.protobuf.RemoteResponse.executable_output', index=3,
+      name='executable_output', full_name='gg.protobuf.ResponseItem.executable_output', index=3,
       number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
@@ -353,21 +376,70 @@ _REMOTERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=548,
-  serialized_end=653,
+  serialized_start=572,
+  serialized_end=675,
+)
+
+
+_EXECUTIONRESPONSE = _descriptor.Descriptor(
+  name='ExecutionResponse',
+  full_name='gg.protobuf.ExecutionResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='executed_thunks', full_name='gg.protobuf.ExecutionResponse.executed_thunks', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='return_code', full_name='gg.protobuf.ExecutionResponse.return_code', index=1,
+      number=2, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='output', full_name='gg.protobuf.ExecutionResponse.output', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=677,
+  serialized_end=785,
 )
 
 _INFILE.fields_by_name['type'].enum_type = _INFILE_TYPE
 _INFILE_TYPE.containing_type = _INFILE
 _THUNK.fields_by_name['function'].message_type = _FUNCTION
 _THUNK.fields_by_name['infiles'].message_type = _INFILE
-_LAMBDAEVENT.fields_by_name['infiles'].message_type = _LAMBDAINFILE
+_EXECUTIONREQUEST.fields_by_name['thunks'].message_type = _REQUESTITEM
+_EXECUTIONRESPONSE.fields_by_name['executed_thunks'].message_type = _RESPONSEITEM
 DESCRIPTOR.message_types_by_name['Function'] = _FUNCTION
 DESCRIPTOR.message_types_by_name['InFile'] = _INFILE
 DESCRIPTOR.message_types_by_name['Thunk'] = _THUNK
 DESCRIPTOR.message_types_by_name['LambdaInFile'] = _LAMBDAINFILE
-DESCRIPTOR.message_types_by_name['LambdaEvent'] = _LAMBDAEVENT
-DESCRIPTOR.message_types_by_name['RemoteResponse'] = _REMOTERESPONSE
+DESCRIPTOR.message_types_by_name['RequestItem'] = _REQUESTITEM
+DESCRIPTOR.message_types_by_name['ExecutionRequest'] = _EXECUTIONREQUEST
+DESCRIPTOR.message_types_by_name['ResponseItem'] = _RESPONSEITEM
+DESCRIPTOR.message_types_by_name['ExecutionResponse'] = _EXECUTIONRESPONSE
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Function = _reflection.GeneratedProtocolMessageType('Function', (_message.Message,), dict(
   DESCRIPTOR = _FUNCTION,
@@ -397,19 +469,33 @@ LambdaInFile = _reflection.GeneratedProtocolMessageType('LambdaInFile', (_messag
   ))
 _sym_db.RegisterMessage(LambdaInFile)
 
-LambdaEvent = _reflection.GeneratedProtocolMessageType('LambdaEvent', (_message.Message,), dict(
-  DESCRIPTOR = _LAMBDAEVENT,
+RequestItem = _reflection.GeneratedProtocolMessageType('RequestItem', (_message.Message,), dict(
+  DESCRIPTOR = _REQUESTITEM,
   __module__ = 'gg_pb2'
-  # @@protoc_insertion_point(class_scope:gg.protobuf.LambdaEvent)
+  # @@protoc_insertion_point(class_scope:gg.protobuf.RequestItem)
   ))
-_sym_db.RegisterMessage(LambdaEvent)
+_sym_db.RegisterMessage(RequestItem)
 
-RemoteResponse = _reflection.GeneratedProtocolMessageType('RemoteResponse', (_message.Message,), dict(
-  DESCRIPTOR = _REMOTERESPONSE,
+ExecutionRequest = _reflection.GeneratedProtocolMessageType('ExecutionRequest', (_message.Message,), dict(
+  DESCRIPTOR = _EXECUTIONREQUEST,
   __module__ = 'gg_pb2'
-  # @@protoc_insertion_point(class_scope:gg.protobuf.RemoteResponse)
+  # @@protoc_insertion_point(class_scope:gg.protobuf.ExecutionRequest)
   ))
-_sym_db.RegisterMessage(RemoteResponse)
+_sym_db.RegisterMessage(ExecutionRequest)
+
+ResponseItem = _reflection.GeneratedProtocolMessageType('ResponseItem', (_message.Message,), dict(
+  DESCRIPTOR = _RESPONSEITEM,
+  __module__ = 'gg_pb2'
+  # @@protoc_insertion_point(class_scope:gg.protobuf.ResponseItem)
+  ))
+_sym_db.RegisterMessage(ResponseItem)
+
+ExecutionResponse = _reflection.GeneratedProtocolMessageType('ExecutionResponse', (_message.Message,), dict(
+  DESCRIPTOR = _EXECUTIONRESPONSE,
+  __module__ = 'gg_pb2'
+  # @@protoc_insertion_point(class_scope:gg.protobuf.ExecutionResponse)
+  ))
+_sym_db.RegisterMessage(ExecutionResponse)
 
 
 # @@protoc_insertion_point(module_scope)
