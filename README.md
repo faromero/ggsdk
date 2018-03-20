@@ -10,11 +10,8 @@ Note: In this README, ```gg``` refers to the execution platform while GG refers 
 
 ## ggSDK API
 ### GG Class
-```GG(env=’lambda’, numjobs=100, cleanenv=True, isgen=True)```: Class Constructor
-- **env**: Environment to execute thunks in. Currently supports *lambda* (default) and *local*
-- **numjobs**: Maximum number of workers executing thunks. For lambda environment, this means maximum number of lambda that are running at any given time. Default is 100
+```GG(cleanenv=True)```: Class Constructor
 - **cleanenv**: Setting this to True (default) will remove the reductions and remote directories from .gg, which is the local directory used by gg to keep track of thunks and their reductions. This will allow ```gg``` to perform a “fresh” experiment run each time it runs. Setting this to False will maintain previous runs, which means that gg will likely not have to do any new thunk executions when rerun.
-- **isgen**: Is a generic function. By default, this is set to True since almost all pipelines and graphs written in ```ggSDK``` are not software builds. However, if you wish to do a software build graph with ```ggSDK```, set this to False.
 
 ```set_env(env)```: Function to change the environment after class object creation.
 
@@ -22,12 +19,18 @@ Note: In this README, ```gg``` refers to the execution platform while GG refers 
 
 ```clean_env(deepClean=False)```: Function to clean gg environment. By default, this gets called by the GG constructor with deepClean=False (i.e. only remove the reductions and remote directories). User can call this method with deepClean=True to remove all directories from .gg and start the ```gg``` environment from scratch.
 
-```force(inputs, showstatus=True, showcomm=True)```: Creates all thunks recursively and calls on ```gg``` to execute them.
-- **inputs**: one or more thunks to be executed. For multiple thunks, pass in as a list. Function call will block until execution is completed.
+```create_thunks(inputs)```: Creates all thunks recursively, starting from *inputs*. Does not execute them, thus allowing for the user to manage thunks separately
+- **inputs**: one or more thunks to be starting point for thunk creations. For multiple thunks, pass in as a list. Function call will block until execution is completed.
+
+```create_and_force(inputs, showstatus=True, showcomm=True, env='lambda', numjobs=100, genfunc=True)```: Creates all thunks recursively, starting from *inputs*, and calls on ```gg``` to execute them
+- **inputs**: one or more thunks to be starting point for thunk creations. For multiple thunks, pass in as a list. Function call will block until execution is completed.
 - **showstatus**: Append the status flag to ```gg```’s command arguments to show the thunk execution progress. Defaults to True.
 - **showcomm**: Print the command that ```ggSDK``` will use to invoke ```gg```. Defaults to True.
+- **env**: Environment to execute thunks in. Currently supports *lambda* (default) and *local*
+- **numjobs**: Maximum number of workers executing thunks. For lambda environment, this means maximum number of lambda that are running at any given time. Default is 100
+- **isgen**: Is a generic function. By default, this is set to True since almost all pipelines and graphs written in ```ggSDK``` are not software builds. However, if you wish to do a software build graph with ```ggSDK```, set this to False.
 
-Users almost always will only need to call ```force```.
+Users almost always will only need to call ```create_thunks``` or ```create_and_force```.
 
 ### GGThunk Class
 ```GGThunk(exe, envars=[], outname=’’, exe_args=[], args_infiles=True)```: Class Constructor
