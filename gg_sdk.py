@@ -9,10 +9,11 @@ import hashlib
 import base64
 import multiprocessing as mp # For getting number of cores
 import magic # pip install python_magic
-import gg_pb2 # User needs to build gg.proto
+import gg_pb2 # User may need to build gg.proto
 
 from threading import Thread
 from concurrent.futures import Future
+from timeit import default_timer as now
 
 gg_magic_hash = '@@GG_HASH@@'
 gg_magic_num = '##GGTHUNK##'
@@ -403,36 +404,11 @@ GG class. Interfaces with the GG platform, creates GGThunk placeholders,
 and creates graph.
 """
 class GG(object):
-    def __init__(self, env='lambda', numjobs=100, sched='default',
-            cleanenv=True, isgen=True):
-        self.env = env
-        self.nj = numjobs
-        self.sched = sched
-        self.genfunc = isgen
-
+    def __init__(self, cleanenv=True, isgen=True):
         if cleanenv:
             self.clean_env()
 
         self.initialize()
-
-    """
-    Function to set environment after creation
-    """
-    def set_env(self, env):
-        self.env = env
-
-    """
-    Function to set number of jobs after creation
-    """
-    def set_numjobs(self, numjobs):
-        self.nj = numjobs
-
-    """
-    Function to set scheduler after creation
-    Legacy function for original grouping functionality
-    """
-    def set_sched(self, sched):
-        self.sched = sched
 
     """
     Function to clean gg environment
@@ -485,20 +461,16 @@ class GG(object):
     """
     Generate gg-force command
     """
-    def __get_force_comm(self, inputs, showstatus):
-        if self.env == 'lambda':
+    def __get_force_comm(self, inputs, showstatus, env, genfunc, numjobs):
+        if env == 'lambda':
             os.environ['GG_LAMBDA'] = '1'
-        elif self.env == 'remote':
+        elif env == 'remote':
             os.environ['GG_REMOTE'] = '1'
 
-        # Legacy
-        #os.environ['GG_MAXJOBS'] = str(self.nj)
-        #sched_inp = ['--sched=' + self.sched]
-
-        if self.genfunc:
+        if genfunc:
             os.environ['GG_GENERIC_FUNCTION'] = '1'
 
-        nj_inp = ['--jobs', str(self.nj)]
+        nj_inp = ['--jobs', str(numjobs)]
 
         cmd_start = ['gg-force']
         if showstatus:
@@ -518,11 +490,13 @@ class GG(object):
         return self.__create_placeholder(my_chunk)
 
     """
-    Function called by user to execute thunks
+    Function called by user to create thunks.
     Function will first create placeholders if needed
-    by first creating all thunks (i.e. generating graph)
+    by first creating all thunks (i.e. generating graph).
+    This function will NOT execute the thunks
     """
-    def force(self, inputs, showstatus=True, showcomm=True):
+    def create_thunks(self, inputs):
+        start = now()
         # Perform sanity checks
         if not inputs:
             print("List of inputs is empty!")
@@ -545,9 +519,6 @@ class GG(object):
                     inp.set_outname(next_filename)
                     out_index += 1
 
-                #inp.generate_thunk(0)
-            #cmd_inp = self.__create_placeholder(inputs)
-
             # Multithread thunk generation
             all_threads = []
             num_cores = mp.cpu_count()
@@ -564,21 +535,43 @@ class GG(object):
 
             for at in all_threads:
                 cmd_inp.extend(at.result())
+
+            if len(cmd_inp) != len(inputs):
+                print("Error: cmd_inp != inputs")
+                sys.exit(1)
         elif isinstance(inputs[0], str):
+            print("Nothing to generate...")
             cmd_inp = inputs
         else:
-            print("invalid input: must be a thunk placeholder file or GGThunk object")
-            return -1
+            print("invalid input: must be a GGThunk object")
+            sys.exit(1)
 
-        cmd = self.__get_force_comm(cmd_inp, showstatus)
+        end = now()
+        delta = end - start
+        print("Time to generate thunks: %.3f seconds" % delta)
+        return cmd_inp
+
+    """
+    Function called by user to execute thunks
+    Function will first create placeholders if needed
+    by first creating all thunks (i.e. generating graph)
+    """
+    def create_and_force(self, inputs, showstatus=True, showcomm=True,
+                        env='lambda', numjobs=100, genfunc=True):
+        cmd_inp = self.create_thunks(inputs)
+
+        cmd = self.__get_force_comm(cmd_inp, showstatus, env, genfunc, numjobs)
         if showcomm:
             jcomm = ' '.join(cmd)
             print("Env variables already set. Command being run:", jcomm)
 
+        start = now()
         in_proc = sp.Popen(cmd)
         out = in_proc.communicate()[0]
+        end = now()
+        delta = end - start
+        print("time to execute thunks: %.3f seconds" % delta)
         return out
-
 
     """
     Function to create placeholders

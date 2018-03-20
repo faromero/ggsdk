@@ -58,7 +58,7 @@ def main(args):
         ts = get_dur_fps(ac)
         all_dur[ac] = ts
 
-    gg = GG(env=execEnv, numjobs=nJobs)
+    gg = GG()
     all_thunks = []
 
     start = now()
@@ -86,7 +86,7 @@ def main(args):
     end = now()
     delta = end - start
     print("Total time to declare thunks: %.3f seconds" % delta)
-    gg.force(all_thunks, showcomm=False)
+    gg.create_and_force(all_thunks, showcomm=False, numjobs=nJobs, env=execEnv)
 
 if __name__ == '__main__':
     clear_chunks()

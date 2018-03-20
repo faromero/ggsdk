@@ -180,7 +180,7 @@ if __name__ == '__main__':
     quality = int(sys.argv[4])
     nworkers = int(sys.argv[5])
 
-    gg = GG(env='lambda', numjobs=nworkers)
+    gg = GG()
 
     batch_start = start
 
@@ -190,4 +190,4 @@ if __name__ == '__main__':
         out_thunks.extend(generate_batch(batch_start, batch_end, quality))
         batch_start = batch_end + 1
 
-    gg.force(out_thunks)
+    gg.create_and_force(out_thunks, showcomm=False, numjobs=nworkers)
