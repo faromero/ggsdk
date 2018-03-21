@@ -222,9 +222,12 @@ class GGThunk(object):
 
         # Generate hash, and write to file
         self.thunk_hash = self.__gen_hash_bytes(str.encode(gg_magic_num) + ser_thunk)
-        fd = open('.gg/blobs/' + self.thunk_hash, "wb")
-        fd.write(str.encode(gg_magic_num) + ser_thunk)
-        fd.close()
+        check_file = os.path.isfile('.gg/blobs/' + self.thunk_hash)
+
+        if not check_file:
+            fd = open('.gg/blobs/' + self.thunk_hash, "wb")
+            fd.write(str.encode(gg_magic_num) + ser_thunk)
+            fd.close()
 
         """
         print("--ORDER: " + str(self.order) + "--")
@@ -570,7 +573,7 @@ class GG(object):
         out = in_proc.communicate()[0]
         end = now()
         delta = end - start
-        print("time to execute thunks: %.3f seconds" % delta)
+        print("Time to execute thunks: %.3f seconds" % delta)
         return out
 
     """

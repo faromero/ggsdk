@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cp ../gg_pb2.py ../gg_sdk.py .
+cp ../../src/protobufs/gg_pb2.py ../gg_sdk.py .
 
 s3bucket="https://s3-us-west-2.amazonaws.com/gg-generic/vid_dec.zip"
 
