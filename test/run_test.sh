@@ -1,15 +1,7 @@
 #!/bin/bash
 
-# Copy gg_pb2.py and gg_sdk.py into test directory
-# When this script is run as a part of make check,
-# search for gg_pb2.py in parent directory. Otherwise,
-# search in src/protobufs
-cp ../gg_sdk.py .
-if [ ! -f ../gg_pb2.py ]; then
-    cp ../../src/protobufs/gg_pb2.py .
-else
-    cp ../gg_pb2.py .
-fi
+# Copy gg_sdk.py into test directory
+cp ../src/gg_sdk.py .
 
 # Check that test_program.cc exists
 if [ ! -f test_program.cc ]; then

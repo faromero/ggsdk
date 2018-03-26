@@ -15,7 +15,6 @@ def main():
         next_thunk.add_infile(test_lines)
         all_thunks.append(next_thunk)
 
-    #gg.create_and_force(all_thunks, showcomm=False, showstatus=False, numjobs=10)
     gg.create_thunks(all_thunks)
 
 if __name__ == '__main__':

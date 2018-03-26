@@ -9,9 +9,9 @@ import subprocess as sp
 from timeit import default_timer as now
 from gg_sdk import GG, GGThunk
 
-CMD = "ffmpeg -i {video} -ss 00:{min}:{sec} -frames:v 1 {ofile}"
+CMD = "ffmpeg -loglevel panic -i {video} -frames:v {numout} frameout%03d_{ofile}.jpg"
 CMD_IMREC = "li-static {myimage} inception_v3_2016_08_28_frozen.pb imagenet_slim_labels.txt {myoutput}"
-SUFFIX_TO_CLEAR = ['jpg', 'out', 'mp4']
+SUFFIX_TO_CLEAR = ['jpg', 'out']
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -64,22 +64,25 @@ def main(args):
     start = now()
     for vidind, myvid in enumerate(all_chunks):
         ts = int(all_dur[myvid])
-        for ind, i in enumerate(np.arange(0,ts-1,1)):
-            next_min = '%02d' % int(i / 60)
-            next_sec = '%02d' % (i % 60)
-            next_outname = 'frameout%03d_%03d.jpg' % (ind, vidind)
-            next_cmd = CMD.format(video=myvid, min=next_min, sec=next_sec, ofile=next_outname)
-            next_cmd_split = next_cmd.split()
-            gen_jpg_thunk = GGThunk(exe=next_cmd_split[0], outname=next_outname,
-                    exe_args=next_cmd_split[1:], args_infiles=False)
-            gen_jpg_thunk.add_infile(myvid)
+        num_out = int(ts) * 2
+        all_outname = []
+        for j in range(num_out):
+            all_outname.append('frameout%03d_%03d.jpg' % (j + 1, vidind))
 
-            pic_out = 'frameout%03d_%03d_lab.out' % (ind, vidind)
-            last_cmd = CMD_IMREC.format(myimage=next_outname, myoutput=pic_out)
+        next_cmd = CMD.format(video=myvid, numout=num_out, ofile='%03d' % vidind)
+        next_cmd_split = next_cmd.split()
+        gen_jpg_thunk = GGThunk(exe=next_cmd_split[0], outname=all_outname,
+                exe_args=next_cmd_split[1:], args_infiles=False)
+        gen_jpg_thunk.add_infile(myvid)
+
+        for j in range(num_out):
+            pic_out = 'frameout%03d_%03d_lab.out' % (j + 1, vidind)
+            last_cmd = CMD_IMREC.format(myimage=all_outname[j], myoutput=pic_out)
             last_cmd_split = last_cmd.split()
             last_thunk = GGThunk(exe=last_cmd_split[0], outname=pic_out,
                     exe_args=last_cmd_split[1:], args_infiles=False)
-            last_thunk.add_infile(['inception_v3_2016_08_28_frozen.pb', 'imagenet_slim_labels.txt', gen_jpg_thunk])
+            last_thunk.add_infile(['inception_v3_2016_08_28_frozen.pb',
+                    'imagenet_slim_labels.txt', (gen_jpg_thunk, all_outname[j])])
 
             all_thunks.append(last_thunk)
 

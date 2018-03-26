@@ -9,14 +9,10 @@ import hashlib
 import base64
 import multiprocessing as mp # For getting number of cores
 import magic # pip install python_magic
-import gg_pb2 # User may need to build gg.proto
 
 from threading import Thread
 from concurrent.futures import Future
 from timeit import default_timer as now
-
-gg_magic_hash = '@@GG_HASH@@'
-gg_magic_num = '##GGTHUNK##'
 
 """
 Function used in conjunction with threaded for returning values
@@ -49,9 +45,8 @@ will see <out> as an infile). Thus, the user can tell GG not to do this,
 and instead pass the infiles in manually. May be a point of optimization.
 """
 class GGThunk(object):
-    def __init__(self, exe, envars=[], num_out=1, outname='', exe_args=[],
+    def __init__(self, exe, envars=[], outname=[], exe_args=[],
                  args_infiles=True):
-        self.num_outputs = num_out
         self.exe = exe
         self.thunk_hash = ''
         self.args = exe_args
@@ -66,8 +61,11 @@ class GGThunk(object):
 
         if not isinstance(self.envars, list):
             self.envars = [self.envars]
-        if not isinstance(exe_args, list):
+        if not isinstance(self.args, list):
             self.args = [self.args]
+        if not isinstance(self.outname, list):
+            self.outname = [self.outname]
+
         if args_infiles:
             for ea in self.args:
                 # Only add if a GGThunk or a string but not a flag
@@ -86,10 +84,18 @@ class GGThunk(object):
             all_inf = [all_inf]
         for new_inf in all_inf:
             new_inf_file_flag = False
+            new_inf_tuple_flag = False
             if isinstance(new_inf, str):
                 new_inf_file_flag = True
-            elif not isinstance(new_inf, GGThunk):
+            elif isinstance(new_inf, tuple):
+                    new_inf_tuple_flag = True
+            elif isinstance(new_inf, GGThunk):
+                if len(new_inf.get_all_outname()) > 1:
+                    print("GGThunks with multiple infiles must specify which outfile to use")
+                    sys.exit(1)
+            else:
                 self.__inv_file_print()
+                sys.exit(1)
 
             _if_type = if_type
 
@@ -98,7 +104,7 @@ class GGThunk(object):
                      if_type != 'EXECUTABLE' or
                      if_type != 'GGTHUNK' ):
                     self.__inv_file_print()
-                    return
+                    sys.exit(1)
             else:
                 if new_inf_file_flag:
                     # Check if file exists before attempting to predict
@@ -125,8 +131,10 @@ class GGThunk(object):
 
             if new_inf_file_flag:
                 self.file_infiles[new_inf] = _if_type
-            else:
+            elif new_inf_tuple_flag:
                 self.ggth_infiles.append(new_inf)
+            else:
+                self.ggth_infiles.append((new_inf, ''))
 
     """
     Function called by the GG class to generate and
@@ -135,13 +143,15 @@ class GGThunk(object):
     def generate_thunk(self, outnum):
         # Go through GGThunk infiles and recursively generate
         for inf in self.ggth_infiles:
-            if inf.outname == '':
-                inf.set_outname('output_' + str(outnum))
-            inf.generate_thunk(outnum + 1)
+            curr_thunk = inf[0]
+            curr_search = inf[1]
+            if curr_thunk.outname == []:
+                curr_thunk.add_outname('output_' + str(outnum))
+            curr_thunk.generate_thunk(outnum + 1)
 
             # Accounts for user passing in GGThunk as exe_arg
-            if inf in self.args:
-                self.args[self.args.index(inf)] = inf.get_outname()
+            if curr_thunk in self.args:
+                self.args[self.args.index(curr_thunk)] = curr_thunk.get_outname(curr_search)
 
         self.__compute_order()
 
@@ -150,97 +160,64 @@ class GGThunk(object):
         if not self.ggth_infiles:
             self.order = 1
 
-        self.__proto_ser_thunk()
+        self.__create_ser_thunk(outnum == 0)
 
     """-------- Helper and accessor functions --------"""
+
     """
-    Function for generating json for printing thunk. 
-    Originally also meant for generating thunks,
-    but now only used for printing.
+    Serialize thunk by building the gg-create-thunk call
     """
-    def __gen_thunk_json(self):
+    def __create_ser_thunk(self, isPlaceholder):
         all_infiles = self.__comb_infiles()
-        data = { 'function': {
-                                'exe': self.exe,
-                                'args': self.args,
-                                'hash': self.__file_hash(self.exe),
-                                'envars': self.envars,
-                             },
-                 'infiles': [{
-                                'filename': inf[0],
-                                'hash': inf[1],
-                                'order': inf[2],
-                                'size': inf[3],
-                                'type': inf[4]
-                             } for inf in all_infiles],
-                'outfile': self.outname
-        }
-        return data
 
-    """
-    Create protobuf and serialize thunk
-    """
-    def __proto_ser_thunk(self):
-        all_infiles = self.__comb_infiles()
-        thunk_proto = gg_pb2.Thunk()
+        cmd = ['gg-create-thunk']
+ 
+        # Add envars
+        for ev in self.envars:
+            cmd.extend(['-v', ev])
 
-        # Add Function
-        func_proto = thunk_proto.function
-        func_proto.exe = self.exe
-        func_proto.hash = self.__file_hash(self.exe)
-        func_proto.args.extend(self.args)
-        func_proto.envars.extend(self.envars)
+        # Add outputs
+        for o in self.outname:
+            cmd.extend(['-o', o])
 
-        # Add Infiles
-        all_inf = []
+        # Create placeholder if applicable
+        # XXX: support multiple placeholder generation
+        if isPlaceholder:
+            if len(self.outname) > 1:
+                print("gg currently only supports target thunks to have 1 outfile")
+                sys.exit(1)
+
+            cmd.extend(['-C', './' + self.outname[0]])
+
+        # Add all Infiles
         for inf in all_infiles:
-            inf_proto = gg_pb2.InFile()
-            inf_proto.filename = inf[0]
-            inf_proto.hash = inf[1]
-            inf_proto.order = inf[2]
-            inf_proto.size = inf[3]
-            inf_type = inf[4]
-            if inf_type == 'FILE':
-                inf_proto.type = gg_pb2.InFile.FILE
+            inf_type = inf[1]
+            if inf_type == 'FILE' or inf_type == 'DUMMY_DIRECTORY':
+                cmd.extend(['-v', inf[0]])
             elif inf_type == 'EXECUTABLE':
-                inf_proto.type = gg_pb2.InFile.EXECUTABLE
-            elif inf_type == 'DUMMY_DIRECTORY':
-                inf_proto.type = gg_pb2.InFile.DUMMY_DIRECTORY
-            else:
-                print("Unknown type: " + inf_type + ", setting to FILE")
-                inf_proto.type = gg_pb2.InFile.FILE
+                cmd.extend(['-e', inf[0]])
+            elif inf_type == 'GGTHUNK':
+                cmd.extend(['-t', inf[0]])
 
-            all_inf.append(inf_proto)
+        # Append to avoid getopt from seeing anything past this as flags
+        cmd.append('--')
 
-        thunk_proto.infiles.extend(all_inf)
+        # Get function hash and function args
+        func_hash = self.__file_hash(self.exe)
+        cmd.append(func_hash)
+        func_args = [self.exe] + self.args
+        cmd.extend(func_args)
 
-        # Add Outfile
-        thunk_proto.outfile = self.outname
+        in_proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE)
+        out = in_proc.communicate()[1].strip().decode('utf-8')
 
-        # Serialize to string
-        ser_thunk = thunk_proto.SerializeToString()
+        if 'gg-create-thunk' in out:
+            print("Error: " + out)
+            print("Tried to run: " + ' '.join(cmd))
 
-        # Generate hash, and write to file
-        self.thunk_hash = self.__gen_hash_bytes(str.encode(gg_magic_num) + ser_thunk)
-        check_file = os.path.isfile('.gg/blobs/' + self.thunk_hash)
+            sys.exit(1)
 
-        if not check_file:
-            fd = open('.gg/blobs/' + self.thunk_hash, "wb")
-            fd.write(str.encode(gg_magic_num) + ser_thunk)
-            fd.close()
-
-        """
-        print("--ORDER: " + str(self.order) + "--")
-        print(str(thunk_proto))
-        """
-
-    """
-    Function for printing thunks
-    """
-    def print_thunk(self):
-        print("--ORDER: " + str(self.order) + "--")
-        print(json.dumps(self.__gen_thunk_json(),
-                    indent=2, separators=(',', ': ')))
+        self.thunk_hash = out
 
     """
     Thunk hash accessor
@@ -252,10 +229,24 @@ class GGThunk(object):
         return self.thunk_hash
 
     """
-    Thunk outfile name accessor
+    Thunk outfile accessor for all names
     """
-    def get_outname(self):
+    def get_all_outname(self):
         return self.outname
+
+    """
+    Thunk outfile accessor by name
+    """
+    def get_outname(self, search):
+        if search == '':
+            assert len(self.outname) == 1
+            return self.outname[0]
+        else:
+            if search in self.outname:
+                return self.outname[self.outname.index(search)]
+            else:
+                print('%s not found in list of outnames' % search)
+                sys.exit(1)
 
     """
     Thunk order accessor
@@ -264,10 +255,10 @@ class GGThunk(object):
         return self.order
 
     """
-    Function to set the Thunk's outfile name
+    Function to add to the Thunk's outfile name
     """
-    def set_outname(self, new_name):
-        self.outname = new_name
+    def add_outname(self, new_name):
+        self.outname.append(new_name)
 
     """
     Function to either look up hash from hash_cache, or
@@ -276,7 +267,7 @@ class GGThunk(object):
     NOTE: Python does not have a timespec struct, so the
     comparisons are only done with seconds, not nanoseconds.
     The nanoseconds entries are INCORRECT, but are implemented
-    to maintain valid file format. However, since ggLang
+    to maintain valid file format. However, since ggSDK
     generates its own thunks, this should not be a problem.
     """
     def __file_hash(self, filename):
@@ -322,22 +313,27 @@ class GGThunk(object):
             if not os.path.exists('.gg/blobs/' + next_hash):
                 shutil.copy(k, '.gg/blobs/' + next_hash)
             next_size = os.path.getsize('.gg/blobs/' + next_hash)
-            next_tuple = (k, next_hash, 0, next_size, v)
+            next_tuple = (next_hash, v)
             all_infiles.append(next_tuple)
 
-            # Also need to replace filename in args with magicnum + hash
+            # Also need to replace filename in args with hash
             if k in self.args:
                 self.args[self.args.index(k)] = (
-                        gg_magic_hash + next_hash)
+                        '@{GGHASH:' + next_hash + '}')
         for ig in self.ggth_infiles:
-            next_tuple = (ig.get_outname(), ig.get_hash(), ig.get_order(),
-                    0, 'FILE')
+            curr_thunk = ig[0]
+            curr_search = ig[1]
+            if curr_search == '':
+                hash_outname = curr_thunk.get_hash()
+            else:
+                hash_outname = curr_thunk.get_hash() + '#' + curr_search
+            next_tuple = (hash_outname, 'GGTHUNK')
             all_infiles.append(next_tuple)
 
-            # Also need to replace filename in args with magicnum + hash
-            if ig.get_outname() in self.args:
-                self.args[self.args.index(ig.get_outname())] = (
-                        gg_magic_hash + ig.get_hash())
+            # Also need to replace filename in args with hash
+            if curr_thunk.get_outname(curr_search) in self.args:
+                self.args[self.args.index(curr_thunk.get_outname(curr_search))] = (
+                        '@{GGHASH:' + hash_outname + '}')
 
         return all_infiles
 
@@ -347,7 +343,8 @@ class GGThunk(object):
     def __compute_order(self):
         self.order = 0
         for inf in self.ggth_infiles:
-            self.order = max(inf.get_order(), self.order)
+            curr_thunk = inf[0]
+            self.order = max(curr_thunk.get_order(), self.order)
         self.order += 1
 
     """
@@ -360,47 +357,13 @@ class GGThunk(object):
         print("\tGGTHUNK: GGThunk object")
 
     """
-    Generate hash from a string
-    """
-    def __gen_hash_string(self, h_str):
-        hasher = hashlib.sha256()
-        hasher.update(str.encode(h_str))
-        cont_hash = hasher.digest()
-        dec_hash = base64.b64encode(cont_hash).decode().replace('+','.').replace('/', '_')
-        # Remove last character (=)
-        dec_hash = dec_hash[:-1]
-        suffix = '%08x' % len(h_str)
-        return dec_hash + suffix
-
-    """
-    Generate hash from a string of bytes
-    """
-    def __gen_hash_bytes(self, h_bytes):
-        hasher = hashlib.sha256()
-        hasher.update(h_bytes)
-        cont_hash = hasher.digest()
-        dec_hash = base64.b64encode(cont_hash).decode().replace('+','.').replace('/', '_')
-        dec_hash = dec_hash[:-1]
-        suffix = '%08x' % len(h_bytes)
-        return dec_hash + suffix
-
-    """
     Generate hash from a file
     """
     def __gen_hash_file(self, h_file):
-        fd = os.open(h_file, os.O_RDONLY)
-        content = b''
-        eof_check = False
-        while not eof_check:
-            next_read = os.read(fd, 1024*1024)
+        in_proc = sp.Popen(['gg-hash', h_file], stdout=sp.PIPE)
+        out = in_proc.communicate()[0].strip()
 
-            if next_read != b'':
-                content += next_read
-            else:
-                eof_check = True
-
-        os.close(fd)
-        return self.__gen_hash_bytes(content)
+        return out.decode('utf-8')
 
 """
 GG class. Interfaces with the GG platform, creates GGThunk placeholders,
@@ -490,7 +453,11 @@ class GG(object):
         for c in my_chunk:
             c.generate_thunk(0)
 
-        return self.__create_placeholder(my_chunk)
+        all_out = []
+        for inf in my_chunk:
+            all_out.extend(inf.get_all_outname())
+
+        return all_out
 
     """
     Function called by user to create thunks.
@@ -517,9 +484,9 @@ class GG(object):
             # consistent with placeholder
             out_index = 0
             for inp in inputs:
-                if inp.get_outname() == '':
+                if inp.get_all_outname() == []:
                     next_filename = 'my_output_' + str(out_index) + '.out'
-                    inp.set_outname(next_filename)
+                    inp.add_outname(next_filename)
                     out_index += 1
 
             # Multithread thunk generation
@@ -575,29 +542,5 @@ class GG(object):
         delta = end - start
         print("Time to execute thunks: %.3f seconds" % delta)
         return out
-
-    """
-    Function to create placeholders
-    """
-    def __create_placeholder(self, inputs):
-        header = '#!/usr/bin/env gg-force-and-run'
-        placeholder_thunks = []
-        for inp in inputs:
-            next_filename = inp.get_outname()
-            fd = open(next_filename, 'w')
-            content_hash = inp.get_hash()
-            order = str(inp.get_order())
-            size = str(os.path.getsize('.gg/blobs/' + content_hash))
-            fd.write(header + '\n')
-            fd.write(content_hash + ' ' + order + ' ' + size + '\n')
-            fd.write('*/\n')
-            fd.close()
-            # Make executable
-            st = os.stat(next_filename)
-            os.chmod(next_filename, st.st_mode | stat.S_IEXEC)    
-
-            placeholder_thunks.append(next_filename)
-
-        return placeholder_thunks
 
 
