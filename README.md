@@ -30,15 +30,15 @@ Note: In this README, ```gg``` refers to the execution platform while GG refers 
 Users almost always will only need to call ```create_thunks``` or ```create_and_force```.
 
 ### GGThunk Class
-```GGThunk(exe, envars=[], outname=’’, exe_args=[], args_infiles=True)```: Class Constructor
+```GGThunk(exe, envars=[], outname=[], exe_args=[], args_infiles=True)```: Class Constructor
 - **exe**: Name of binary that will be run when the thunk is forced by ```gg```. Currently, this function must be a statically linked binary.
 - **envars**: List of environment variables that should be set by gg to execute this thunk’s function. Defaults to empty. If there are no environment variables that need to be set, this can be left empty.
-- **outname**: Name of output file. If no output name is given, ```gg``` will create one. Important: if your program produces an output file, it must have the same name as this outname, since ```gg``` will search for a file with this name upon completion of this thunk’s execution. It will also be used as an infile name into thunks that reference this thunk. Thus, it is best to pass a name for outname.
+- **outname**: Name of output files. If no output name is given, ```gg``` will create one. Important: if your program produces an output file, it must have the same name as this outname, since ```gg``` will search for a file with this name upon completion of this thunk’s execution. It will also be used as an infile name into thunks that reference this thunk. Thus, it is best to pass a name for outname.
 - **exe_args**: Executable arguments (such as flags, input files, output files, etc.). Passed in as a list of arguments. Defaults to an empty list. If there are no executable arguments that need to be set, this can be left empty.
 - **args_infiles**: By default, ```gg``` will attempt to take all exe_args and turn them into infiles. This is especially useful if the executable’s arguments are all input files/data with no flags. However, for programs that mix flags with input files, ```ggSDK``` will not be able to differentiate between the two. Thus, if your exe_args are a mix of flags with input files, or if you prefer to explicitly pass in all infiles, set this parameter to be False.
 
 ```add_infile(all_inf, if_type='INVALID')```: Function to add an infile once the thunk is created.
-- **all_inf**: one or more infiles to be added as dependencies. For multiple infiles, pass in as a list. Infiles can be a) the name of a file, b) the name of an executable, and/or c) a GGThunk object (thus creating a graph/pipeline). Infile types can be mixed within the all_inf list.
+- **all_inf**: one or more infiles to be added as dependencies. For multiple infiles, pass in as a list. Infiles can be a) the name of a file, b) the name of an executable, and/or c) a GGThunk object (thus creating a graph/pipeline). Infile types can be mixed within the all_inf list. For infiles that refer to a GGThunk object with multiple outputs, pass infile as a tuple, where the first argument is the GGThunk dependency and the second is the output name that the thunk is dependent on. See *viddec-example* for an example.
 - **if_type**: infile type. This parameter is optional, and can be left as INVALID (the default) since ```ggSDK``` will automatically infer the type (which is especially useful when mixing different infile types).
 
 ```print_thunk()```: Function to print out the thunk in json format.
@@ -60,7 +60,7 @@ Once ```gg``` is installed, no further action needs to be performed to make it w
 ## Examples
 ### Excamera
 ```
-cd excamera-example
+cd examples/excamera-example
 ./fetch-deps.sh
 ./excam_ex.py <start> <end> <batch-size> <cq-level> <num-workers>
 
@@ -70,7 +70,7 @@ Further information about the [Excamera](https://www.usenix.org/conference/nsdi1
 
 ### Video Decoding + Image Recognition
 ```
-cd viddec-example
+cd examples/viddec-example
 ./fetch-deps.sh
 ./ffmpeg_gg.py to run with default parameters, or ./ffmpeg_gg.py -h for information on optional parameters.
 
