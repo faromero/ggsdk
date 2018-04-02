@@ -1,5 +1,7 @@
 # ggSDK
-```ggSDK``` is a Python SDK for interfacing with [```gg```](https://github.com/StanfordSNR/gg). It allows applications developers to create computation graphs and pipelines in native Python code that are eventually executable on ```gg```.
+**NOTE:** This repository is no longer maintained. For the lastest working version of ```ggSDK```, please visit the [```gg```](https://github.com/StanfordSNR/gg) project, and see the ```franky-master``` branch (```ggSDK``` can be found in the tools directory).
+
+```ggSDK``` is a Python SDK for interfacing with ```gg```. It allows applications developers to create computation graphs and pipelines in native Python code that are eventually executable on ```gg```.
 
 The outline of this README is as follows:
 - ```ggSDK``` API
